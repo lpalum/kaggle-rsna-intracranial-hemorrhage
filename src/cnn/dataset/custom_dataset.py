@@ -87,7 +87,7 @@ class CustomDataset(torch.utils.data.Dataset):
         path = '%s/%s.dcm' % (self.cfg.imgdir, row.ID)
 
         dicom = pydicom.dcmread(path)
-        image = dicom.pixel_array
+        image = (dicom.pixel_array).astype(np.float32)
         image = misc.rescale_image(image, row.RescaleSlope, row.RescaleIntercept)
         image = apply_window_policy(image, row, self.cfg.window_policy)
 

@@ -1,6 +1,6 @@
 workdir = './model/model001'
 seed = 20
-apex = True
+apex = False 
 
 n_fold = 5
 epoch = 3
