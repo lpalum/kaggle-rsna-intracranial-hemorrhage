@@ -1,13 +1,13 @@
 workdir = './model/model001'
 seed = 20
-apex = False 
+apex = True 
 
 n_fold = 5
-epoch = 3
+epoch = 3 
 resume_from = None
 
 batch_size = 28
-num_workers = 4
+num_workers = 1
 imgsize = (512, 512) #(height, width)
 
 loss = dict(

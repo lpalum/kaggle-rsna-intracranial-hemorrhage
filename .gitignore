@@ -4,3 +4,4 @@ data
 input
 model
 *.py[cod]
+venv
