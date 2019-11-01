@@ -16,7 +16,7 @@ def cast(value):
 
 
 def get_dicom_raw(dicom):
-    return {attr:cast(getattr(dicom,attr)) for attr in dir(dicom) if attr[0].isupper() and attr not in ['PixelData']}
+    return {attr: cast(getattr(dicom, attr)) for attr in dir(dicom) if attr[0].isupper() and attr not in ['PixelData']}
 
 
 def rescale_image(image, slope, intercept):
@@ -34,11 +34,18 @@ def apply_window(image, center, width):
 
 def get_dicom_meta(dicom):
     return {
-        'PatientID': dicom.PatientID, # can be grouped (20-548)
-        'StudyInstanceUID': dicom.StudyInstanceUID, # can be grouped (20-60)
-        'SeriesInstanceUID': dicom.SeriesInstanceUID, # can be grouped (20-60)
+        'PatientID': dicom.PatientID,  # can be grouped (20-548)
+        'StudyInstanceUID': dicom.StudyInstanceUID,  # can be grouped (20-60)
+        'SeriesInstanceUID': dicom.SeriesInstanceUID,  # can be grouped (20-60)
         'WindowWidth': get_dicom_value(dicom.WindowWidth),
         'WindowCenter': get_dicom_value(dicom.WindowCenter),
         'RescaleIntercept': float(dicom.RescaleIntercept),
-        'RescaleSlope': float(dicom.RescaleSlope), # all same (1.0)
+        'RescaleSlope': float(dicom.RescaleSlope),  # all same (1.0)
     }
+
+
+def hist_scaled(i, bins):
+    ys = np.linspace(0., 1., len(bins))
+    x = i.flatten()
+    x = np.interp(x, bins, ys)
+    return (x).reshape(i.shape).clip(0., 1.)

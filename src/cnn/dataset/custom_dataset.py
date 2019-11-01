@@ -13,10 +13,10 @@ from ..utils.logger import log
 from ...utils import mappings, misc
 
 
-def apply_window_policy(image, row, policy):
+def apply_window_policy(image, row, policy, bins):
     if policy == 1:
-        image1 = misc.apply_window(image, 40, 80) # brain
-        image2 = misc.apply_window(image, 80, 200) # subdural
+        image1 = misc.apply_window(image, 40, 80)  # brain
+        image2 = misc.apply_window(image, 80, 200)  # subdural
         image3 = misc.apply_window(image, row.WindowCenter, row.WindowWidth)
         image1 = (image1 - 0) / 80
         image2 = (image2 - (-20)) / 200
@@ -25,11 +25,11 @@ def apply_window_policy(image, row, policy):
             image1 - image1.mean(),
             image2 - image2.mean(),
             image3 - image3.mean(),
-        ]).transpose(1,2,0)
+        ]).transpose(1, 2, 0)
     elif policy == 2:
-        image1 = misc.apply_window(image, 40, 80) # brain
-        image2 = misc.apply_window(image, 80, 200) # subdural
-        image3 = misc.apply_window(image, 40, 380) # bone
+        image1 = misc.apply_window(image, 40, 80)  # brain
+        image2 = misc.apply_window(image, 80, 200)  # subdural
+        image3 = misc.apply_window(image, 40, 380)  # bone
         image1 = (image1 - 0) / 80
         image2 = (image2 - (-20)) / 200
         image3 = (image3 - (-150)) / 380
@@ -37,7 +37,19 @@ def apply_window_policy(image, row, policy):
             image1 - image1.mean(),
             image2 - image2.mean(),
             image3 - image3.mean(),
-        ]).transpose(1,2,0)
+        ]).transpose(1, 2, 0)
+    elif policy == 3:
+        image1 = misc.apply_window(image, 40, 80)  # brain
+        image2 = misc.apply_window(image, 80, 200)  # subdural
+        image3 = misc.hist_scaled(image, bins)
+        image1 = (image1 - 0) / 80
+        image2 = (image2 - (-20)) / 200
+        image3 = (image3 - image3.min()) / (image3.max()-image3.min())
+        image = np.array([
+            image1 - image1.mean(),
+            image2 - image2.mean(),
+            image3 - image3.mean(),
+        ]).transpose(1, 2, 0)
     else:
         raise
 
@@ -71,6 +83,9 @@ class CustomDataset(torch.utils.data.Dataset):
         with open(cfg.annotations, 'rb') as f:
             self.df = pickle.load(f)
 
+        with open(cfg.bins, 'rb') as f:
+            self.bins = pickle.load(f)
+
         if folds:
             self.df = self.df[self.df.fold.isin(folds)]
             log('read dataset (%d records)' % len(self.df))
@@ -88,8 +103,10 @@ class CustomDataset(torch.utils.data.Dataset):
 
         dicom = pydicom.dcmread(path)
         image = (dicom.pixel_array).astype(np.float32)
-        image = misc.rescale_image(image, row.RescaleSlope, row.RescaleIntercept)
-        image = apply_window_policy(image, row, self.cfg.window_policy)
+        image = misc.rescale_image(
+            image, row.RescaleSlope, row.RescaleIntercept)
+        image = apply_window_policy(
+            image, row, self.cfg.window_policy, self.bins)
 
         image = self.transforms(image=image)['image']
 
