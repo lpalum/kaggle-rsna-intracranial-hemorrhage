@@ -5,3 +5,7 @@ input
 model
 *.py[cod]
 venv
+kaggle-rsna.code-workspace
+github
+ssh.txt
+deep-learning.pem
