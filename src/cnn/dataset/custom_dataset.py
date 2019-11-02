@@ -13,7 +13,7 @@ from ..utils.logger import log
 from ...utils import mappings, misc
 
 
-def apply_window_policy(image, row, policy, bins):
+def apply_window_policy(image, dicom, policy, bins):
     if policy == 1:
         image1 = misc.apply_window(image, 40, 80)  # brain
         image2 = misc.apply_window(image, 80, 200)  # subdural
@@ -41,7 +41,7 @@ def apply_window_policy(image, row, policy, bins):
     elif policy == 3:
         image1 = misc.apply_window(image, 40, 80)  # brain
         image2 = misc.apply_window(image, 80, 200)  # subdural
-        image3 = misc.hist_scaled(image, bins)
+        image3 = np.array(misc.dcm_tfm(dicom, bins))
         image1 = (image1 - 0) / 80
         image2 = (image2 - (-20)) / 200
         image3 = (image3 - image3.min()) / (image3.max()-image3.min())
@@ -99,14 +99,14 @@ class CustomDataset(torch.utils.data.Dataset):
     def __getitem__(self, idx):
         row = self.df.iloc[idx]
 
-        path = '%s/%s.dcm' % (self.cfg.imgdir, row.ID)
+        path = Path('%s/%s.dcm' % (self.cfg.imgdir, row.ID))
 
-        dicom = pydicom.dcmread(path)
+        dicom = path.dcmread()
         image = (dicom.pixel_array).astype(np.float32)
         image = misc.rescale_image(
             image, row.RescaleSlope, row.RescaleIntercept)
         image = apply_window_policy(
-            image, row, self.cfg.window_policy, self.bins)
+            image, dicom, self.cfg.window_policy, self.bins)
 
         image = self.transforms(image=image)['image']
 
