@@ -1,4 +1,4 @@
-workdir = './model/model001'
+workdir = './model/model002'
 seed = 20
 apex = True
 
@@ -49,7 +49,7 @@ contrast = dict(name='RandomBrightnessContrast', params=dict(
 totensor = dict(name='ToTensor', params=dict(normalize=normalize))
 rotate = dict(name='Rotate', params=dict(limit=30, border_mode=0), p=0.7)
 
-window_policy = 2
+window_policy = 3
 bins = './cache/bins.pkl'
 
 data = dict(
@@ -69,6 +69,7 @@ data = dict(
         transforms=[crop, hflip, rotate, contrast, totensor],
         dataset_policy='all',
         window_policy=window_policy,
+        bins=bins,
     ),
     valid=dict(
         dataset_type='CustomDataset',
@@ -85,6 +86,7 @@ data = dict(
         transforms=[crop, hflip, rotate, contrast, totensor],
         dataset_policy='all',
         window_policy=window_policy,
+        bins=bins,
     ),
     test=dict(
         dataset_type='CustomDataset',
@@ -101,5 +103,6 @@ data = dict(
         transforms=[crop, hflip, rotate, contrast, totensor],
         dataset_policy='all',
         window_policy=window_policy,
+        bins=bins,
     ),
 )
