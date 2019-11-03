@@ -44,22 +44,3 @@ def get_dicom_meta(dicom):
     }
 
 
-def fix_pxrepr(dcm):
-    if dcm.PixelRepresentation != 0 or dcm.RescaleIntercept < -100:
-        return
-    x = dcm.pixel_array + 1000
-    px_mode = 4096
-    x[x >= px_mode] = x[x >= px_mode] - px_mode
-    dcm.PixelData = x.tobytes()
-    dcm.RescaleIntercept = -1000
-
-
-def dcm_tfm(x, bins):
-    try:
-        fix_pxrepr(x)
-    except Exception as e:
-        print(e)
-        raise SkipItemException
-    if x.Rows != 512 or x.Columns != 512:
-        x.zoom_to((512, 512))
-    return x.scaled_px.hist_scaled(bins)

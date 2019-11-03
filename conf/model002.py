@@ -3,8 +3,8 @@ seed = 20
 apex = True
 
 n_fold = 5
-epoch = 6
-resume_from = None 
+epoch = 3
+resume_from = None
 
 batch_size = 28
 num_workers = 4
